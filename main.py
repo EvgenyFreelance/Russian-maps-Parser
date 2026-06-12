@@ -14,10 +14,10 @@ class Parser():
 
         # --- Создание макета данных которые будет парсит парсер ---
         self.data = {'Название': [],
-                     'Ссылка': [],
                      'Адрес': [],
-                     'Сайт': [],
                      'Телефон(ы)': [],
+                     'Ссылка': [],
+                     'Сайт': [],
                      'Типы учреждений': [],}
 
     # --- Создаем функции, которя скроллит вниз на определённой странице, до определённого элемента
@@ -88,7 +88,7 @@ class Parser():
                     categories  = [x.inner_text() + ', ' for x in categories.query_selector_all('span.button__text')] if categories else 'Указанные типы отсутствуют'
                     self.data['Типы учреждений'].append(''.join(categories))
 
-                    time.sleep(2)
+                    time.sleep(1)
 
             print(self.data)
             time.sleep(10)
