@@ -2,8 +2,8 @@ from  main import Parser
 import sqlite3
 import pandas as pd
 
-def to_sqlite(data,db_name='parsing_results'):
-    connection = sqlite3.connect(f'outputs/{db_name}.db')
+def to_sqlite(data,path='/outputs/parsing_results.db'):
+    connection = sqlite3.connect(path)
     cursor = connection.cursor()
 
     cursor.execute("""
@@ -39,6 +39,6 @@ if __name__ == '__main__':
     result = parser.get_result()
     to_excel(result)
     result = [x for x in zip( range(1, len(result['Название']) + 1), *result.values() )]
-    to_sqlite(result)
+    to_sqlite(result,)
 
 
