@@ -13,34 +13,43 @@ def start_parsing(start_bool_sm,pipe,txt_path,json_path,**kwargs,):
 
 # --- Вложенная функция с инициализаций класса и 2 потоками 1 из которых парсит другой проверяет состояние переменной ---
 def nested_process(bool_sm,pipe,txt_path,json_path,**kwargs):
+    try:
+        proxies = get_json(json_path)
+        requests = get_txt(txt_path)
 
-    proxies = get_json(json_path)
-    requests = get_txt(txt_path)
+        parser = Parser(url='https://yandex.ru/maps', requests=requests,proxies=proxies)
 
-    parser = Parser(url='https://yandex.ru/maps', requests=requests,proxies=proxies)
+        def parsing():
+            try:
+                parser.parse()
+                time.sleep(2)
+                data = parser.get_result()
+                print(data)
+                pipe.put(data)
+                time.sleep(1)
+            except Exception as er:
+                print(er)
 
-    def parsing():
-        parser.parse()
-        data = parser.get_result()
-        pipe.send(data)
+        t1 = threading.Thread(target=parsing)
 
-    t1 = threading.Thread(target=parsing)
+        def checking():
+            while True:
+                if not bool_sm.value:
+                    parser.stop()
+                    time.sleep(1)
+                    break
 
-    def checking():
-        while True:
-            if not bool_sm.value:
-                parsed_data = parser.get_result()
-                print(parsed_data)
-                pipe.send(parsed_data) # <--
-                parser.stop()
-                break
+        t2 = threading.Thread(target=checking)
+        t1.start()
+        t2.start()
 
-    t2 = threading.Thread(target=checking)
-    t1.start()
-    t2.start()
+        t2.join()
+    except Exception as er:
+        print(er)
 
 # Сохраняет указанные данные
 def saving(data,export_pieces):
+    print(data)
     for export in export_pieces:
         os.makedirs(export[0],exist_ok=True)
 

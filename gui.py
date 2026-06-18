@@ -4,8 +4,11 @@ from tkinter import filedialog
 from main import Parser
 import multiprocessing.sharedctypes
 import backend_of_gui as back
+import time
 
 def window():
+    queue = multiprocessing.Queue()
+
     # --- Создаем контекстное меню ---
     window = Tk()
     window.title('Контекстное меня для настройки парсера')
@@ -15,7 +18,6 @@ def window():
 
     export_pieces = []
 
-    p_conn , c_conn = multiprocessing.Pipe()
 
     # --- Необходимые функции для фронтенда ---
     def select_file_json():
@@ -90,12 +92,13 @@ def window():
         if cur_text == 'Старт':
             run_btn.config(text='Стоп',bg='red',fg='white',width=5)
             variable.value = True
-            back.start_parsing(variable,c_conn,txt_path=requests.get(),json_path=proxy.get())
+            back.start_parsing(variable,queue,txt_path=requests.get(),json_path=proxy.get())
 
 
         else:
             variable.value = False
             run_btn.config(text='Старт',bg='green',fg='white',width=5)
+
 
 
     button_style = {
@@ -187,7 +190,7 @@ def window():
     run_btn.place(x=70,y=530)
 
     # --- Кнопка экспорта ---
-    export_btn = Button(window,text='Сохранить',bg='blue',fg='white',font='Sans 22',command=lambda:back.saving(p_conn.recv(),export_pieces,))
+    export_btn = Button(window,text='Сохранить',bg='blue',fg='white',font='Sans 22',command=lambda:back.saving(queue.get(),export_pieces,))
     export_btn.place(x=250,y=530)
     window.mainloop()
 
